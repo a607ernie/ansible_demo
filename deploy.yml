@@ -1,0 +1,46 @@
+---
+- name: Git pull with Ansible
+  hosts: test_servers
+  # hosts: localhost
+
+  vars_files:
+    - ./repositories_vars.yml
+    - ./hosts_vars/web_servers.yml
+  vars:
+    git_repo: "{{ lookup('vars', selected_repo) }}"
+    
+  # become: yes
+  # become_user: root
+  # become_method: sudo
+
+  tasks:
+    - name: Choose repo
+      set_fact:
+        git_repo: "{{ item }}"
+      loop: "{{ repositories }}"
+      when: item.name == "{{ selected_repo }}"
+
+    - name: Get path of remote host
+      set_fact:
+        dest_path: "{{ vars.web_servers_git_path.vars[git_repo.name][inventory_hostname] }}"
+
+    - name: Show the repo name
+      debug:
+        msg: "{{ git_repo }}"
+      
+    - name: Discard local modifications (if any)
+      command: git reset --hard HEAD
+      args:
+        chdir: "{{ dest_path }}"
+
+    - name: Fetch updates from origin/master
+      git:
+        repo: "{{ git_repo.url }}"
+        dest: "{{ dest_path }}"
+        version: "{{ git_repo.branch }}"
+        update: yes
+      register: git_result
+
+    - name: Show git module output
+      ansible.builtin.debug:
+        msg: "Git module output: {{ git_result }}"

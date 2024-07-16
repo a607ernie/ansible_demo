@@ -1,0 +1,5 @@
+repositories:
+
+  - name: repo_name
+    url: https://github.com/your_repo/repo_name.git
+    branch: origin/master
