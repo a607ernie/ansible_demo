@@ -27,7 +27,19 @@
     - name: Show the repo name
       debug:
         msg: "{{ git_repo }}"
-      
+
+    - name: Check if destination path exists
+      stat:
+        path: "{{ dest_path }}"
+      register: dest_path_stat
+
+    - name: Clone the repository if the path does not exist
+      git:
+        repo: "{{ git_repo.url }}"
+        dest: "{{ dest_path }}"
+        version: "{{ git_repo.branch }}"
+      when: not dest_path_stat.stat.exists
+
     - name: Discard local modifications (if any)
       command: git reset --hard HEAD
       args:
