@@ -1,5 +1,6 @@
+# change to your git repo
 repositories:
-
   - name: repo_name
     url: https://github.com/your_repo/repo_name.git
-    branch: origin/master
+    branch: master # or main
+    user: admin # 替換為遠端電腦的使用者名稱

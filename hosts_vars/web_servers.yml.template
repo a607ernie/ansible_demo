@@ -1,4 +1,4 @@
 web_servers_git_path:
   vars:
-    git_repo_name:
-      111.111.111.111: /home/Documents/repo/ 
+    NEED_TO_CHANGE_THIS_git_repo_name: # git repo name , e.g. ansible_demo
+      REMOTE_HOST_IP: remote folder path # e.g. 111.11.11.1: /home/Documents/ansible_demo/

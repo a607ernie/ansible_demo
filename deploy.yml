@@ -1,6 +1,6 @@
 ---
 - name: Git pull with Ansible
-  hosts: test_servers
+  hosts: test_servers #可改，對應inventory.ini
   # hosts: localhost
 
   vars_files:
@@ -40,19 +40,39 @@
         version: "{{ git_repo.branch }}"
       when: not dest_path_stat.stat.exists
 
-    - name: Discard local modifications (if any)
-      command: git reset --hard HEAD
+    - name: Fetch remote updates and prune old references
+      command: git fetch --prune origin
       args:
         chdir: "{{ dest_path }}"
+      when: dest_path_stat.stat.exists
 
-    - name: Fetch updates from origin/master
+    - name: Ensure local branch tracks remote branch
+      command: git branch --set-upstream-to=origin/{{ git_repo.branch }} {{ git_repo.branch }}
+      args:
+        chdir: "{{ dest_path }}"
+      when: dest_path_stat.stat.exists
+
+    - name: Reset local branch to match remote
+      command: git reset --hard origin/{{ git_repo.branch }}
+      args:
+        chdir: "{{ dest_path }}"
+      when: dest_path_stat.stat.exists
+
+    - name: Clean untracked files
+      command: git clean -fd
+      args:
+        chdir: "{{ dest_path }}"
+      when: dest_path_stat.stat.exists
+
+    - name: Pull the latest changes from remote
       git:
         repo: "{{ git_repo.url }}"
         dest: "{{ dest_path }}"
         version: "{{ git_repo.branch }}"
         update: yes
+      when: dest_path_stat.stat.exists
       register: git_result
 
     - name: Show git module output
-      ansible.builtin.debug:
+      debug:
         msg: "Git module output: {{ git_result }}"
